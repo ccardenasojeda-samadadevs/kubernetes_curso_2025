@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: prueba
+  labels:
+    app: nginx
+spec:
+  strategy:
+    type: RollingUpdate   # Estrategia por defecto: : Actualiza los Pods de forma gradual, uno por uno, asegurando que la aplicación siga disponible durante el proceso
+    # type: Recreate      # Alternativa: elimina todos los Pods antes de crear los nuevos
+    rollingUpdate:
+      maxUnavailable: 1   # Permite que como máximo 1 Pod del total de réplicas deseadas no esté disponible
+      maxSurge: 1         # Permite que se creen como máximo 1 Pod por encima del número de réplicas deseadas.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+          protocol: TCP
+          name: http
+        # resources:
+        #   requests:
+        #     cpu: 50m
+        #     memory: 64Mi
+        #   limits:
+        #     cpu: 100m
+        #     memory: 128Mi
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 80
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 10
+        # readinessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 80
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 5

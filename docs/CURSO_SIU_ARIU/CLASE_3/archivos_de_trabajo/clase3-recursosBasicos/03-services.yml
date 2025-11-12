@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: prueba
+  name: nginx-html-ci
+  labels:
+    app: nginx
+    service-type: clusterip
+spec:
+  selector:
+    app: nginx
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  type: ClusterIP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: prueba
+  name: nginx-html-lb
+  labels:
+    app: nginx
+    service-type: loadbalancer
+spec:
+  selector:
+    app: nginx
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  type: LoadBalancer
+  # Comentar o ajustar la IP según tu entorno
+  # loadBalancerIP: 170.210.5.160
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: prueba
+  name: nginx-html-np  
+  labels:
+    app: nginx
+    service-type: nodeport
+spec:
+  selector:
+    app: nginx
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+    nodePort: 30285
+  type: NodePort

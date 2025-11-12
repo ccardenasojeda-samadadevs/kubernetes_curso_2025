@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: maintenance-cronjob
+  namespace: prueba
+  labels:
+    app: maintenance-cronjob
+    component: maintenance
+    tier: batch
+  annotations:
+    description: "CronJob de ejemplo que ejecuta tareas de mantenimiento cada 6 minutos"
+spec:
+  # Ejecutar cada 6 minutos
+  schedule: "*/6 * * * *"
+  # Mantener historial de 3 Jobs exitosos
+  successfulJobsHistoryLimit: 3
+  # Mantener historial de 5 Jobs fallidos
+  failedJobsHistoryLimit: 5
+  # No permitir ejecución concurrente de Jobs
+  concurrencyPolicy: Forbid
+  # Si un Job se retrasa más de 100s, considerarlo fallido
+  startingDeadlineSeconds: 100
+  # Eliminar Jobs completados después de 300 segundos (5 minutos)
+  jobTemplate:
+    spec:
+      completions: 1
+      parallelism: 1
+      ttlSecondsAfterFinished: 300
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: maintenance-cronjob
+            component: maintenance
+            tier: batch
+        spec:
+          containers:
+          - name: echo-date-container
+            image: busybox:1.36
+            command: ["/bin/sh", "-c"]
+            args:
+             - |
+               echo "=== CRONJOB: INICIO MANTENIMIENTO PROGRAMADO ==="
+               date
+               echo "Ejecutando tareas de mantenimiento programadas..."
+               sleep 5
+               echo "Finalizando tareas de mantenimiento programadas."
+               date
+               echo "=== CRONJOB: FIN MANTENIMIENTO PROGRAMADO ==="
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                cpu: 50m
+                memory: 32Mi
+          restartPolicy: Never

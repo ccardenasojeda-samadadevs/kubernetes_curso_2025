@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  namespace: prueba
+  labels:
+    app: nginx
+    component: ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # Configuración de timeouts
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/controller.allowSnippetAnnotations: "false"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "190.124.232.0/24,190.124.224.47/32,170.210.163.0/24"
+spec:
+  ingressClassName: nginx
+  
+  tls:
+  - hosts:
+    - prueba.dgcc.unsj.edu.ar
+    secretName: prueba.dgcc.unsj.edu.ar
+  rules:
+  - host: prueba.dgcc.unsj.edu.ar
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-html-ci
+            port:
+              number: 80

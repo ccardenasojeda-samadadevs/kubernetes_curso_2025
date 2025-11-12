@@ -1,0 +1,224 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret-nfs
+  namespace: prueba
+  labels:
+    app: postgres-nfs
+  annotations:
+    description: "Credenciales de PostgreSQL para benchmark con NFS"
+    training-module: "clase5-storage"
+type: Opaque
+stringData:
+  POSTGRES_DB: prueba
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: "PostgresAdmin123!"
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data-nfs
+  namespace: prueba
+  labels:
+    app: postgres-nfs
+    storage-type: nfs
+    tier: storage
+  annotations:
+    description: "PVC para datos de PostgreSQL con NFS"
+    training-module: "clase5-storage"
+spec:
+  storageClassName: nfs-client
+  accessModes:
+  - ReadWriteMany  # NFS soporta RWX
+  resources:
+    requests:
+      storage: 5Gi  # Mismo tamaño que Longhorn para comparar
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-nfs
+  namespace: prueba
+  labels:
+    app: postgres-nfs
+    storage-type: nfs
+  annotations:
+    description: "PostgreSQL StatefulSet con NFS para benchmarks"
+    training-module: "clase5-storage"
+spec:
+  serviceName: postgres-nfs-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-nfs
+  template:
+    metadata:
+      labels:
+        app: postgres-nfs
+        storage-type: nfs
+        tier: database
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        # Configuración de recursos idéntica a Longhorn
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        # Variables de entorno desde Secret
+        envFrom:
+        - secretRef:
+            name: postgres-secret-nfs
+        env:
+        - name: TZ
+          value: "America/Argentina/Buenos_Aires"
+        - name: PGTZ
+          value: "America/Argentina/Buenos_Aires"
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        # Health checks
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - exec pg_isready -U postgres -h 127.0.0.1 -p 5432
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - exec pg_isready -U postgres -h 127.0.0.1 -p 5432
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 6
+        # Montaje del volumen de datos
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+          subPath: postgres
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-data-nfs
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-nfs-headless
+  namespace: prueba
+  labels:
+    app: postgres-nfs
+  annotations:
+    description: "Headless service para PostgreSQL StatefulSet con NFS"
+    training-module: "clase5-storage"
+spec:
+  clusterIP: None
+  selector:
+    app: postgres-nfs
+  ports:
+  - port: 5432
+    targetPort: postgres
+    name: postgres
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-nfs-service
+  namespace: prueba
+  labels:
+    app: postgres-nfs
+  annotations:
+    description: "Service para acceso a PostgreSQL con NFS"
+    training-module: "clase5-storage"
+spec:
+  selector:
+    app: postgres-nfs
+  ports:
+  - port: 5432
+    targetPort: postgres
+    name: postgres
+  type: ClusterIP
+
+# ---
+
+# # Job para ejecutar pgbench automáticamente con NFS
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   name: pgbench-nfs
+#   namespace: prueba
+#   labels:
+#     app: pgbench
+#     storage-type: nfs
+#   annotations:
+#     description: "Job para ejecutar benchmark de PostgreSQL con NFS"
+#     training-module: "clase5-storage"
+# spec:
+#   template:
+#     metadata:
+#       labels:
+#         app: pgbench
+#         storage-type: nfs
+#     spec:
+#       restartPolicy: Never
+#       containers:
+#       - name: pgbench
+#         image: postgres:15-alpine
+#         command:
+#         - /bin/sh
+#         - -c
+#         - |
+#           echo "Esperando a que PostgreSQL esté listo..."
+#           until pg_isready -h postgres-nfs-service -p 5432 -U postgres; do
+#             echo "PostgreSQL no está listo - esperando..."
+#             sleep 2
+#           done
+          
+#           echo "PostgreSQL listo! Iniciando benchmark..."
+#           echo "=== BENCHMARK NFS $(date) ==="
+          
+#           # Crear base de datos si no existe
+#           createdb -h postgres-nfs-service -U postgres prueba || echo "DB ya existe"
+          
+#           # Inicializar pgbench
+#           echo "Inicializando pgbench con scale factor 50..."
+#           pgbench -h postgres-nfs-service -U postgres -i -s 50 prueba
+          
+#           # Ejecutar benchmark
+#           echo "Ejecutando benchmark..."
+#           time pgbench -h postgres-nfs-service -U postgres -c 4 -j 4 -t 1000 prueba
+          
+#           echo "=== BENCHMARK COMPLETADO ==="
+#         env:
+#         - name: PGPASSWORD
+#           value: "PostgresAdmin123!"
+#         resources:
+#           requests:
+#             cpu: 100m
+#             memory: 128Mi
+#           limits:
+#             cpu: 500m
+#             memory: 256Mi

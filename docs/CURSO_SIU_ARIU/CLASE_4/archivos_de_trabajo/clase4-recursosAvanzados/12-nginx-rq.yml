@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: prueba
+  labels:
+    app: nginx-resourcequota-test
+    component: webserver
+    tier: frontend
+  annotations:
+    description: "Deployment que demuestra el funcionamiento de ResourceQuota"
+    resourcequota-demo: "7 replicas pueden exceder los límites del ResourceQuota"
+spec:
+  strategy:
+    type: Recreate
+  # Intentar crear 7 replicas (puede exceder los límites del ResourceQuota)
+  replicas: 7
+  selector:
+    matchLabels:
+      app: nginx-resourcequota-test
+  template:
+    metadata:
+      labels:
+        app: nginx-resourcequota-test
+        component: webserver
+        tier: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+          protocol: TCP
+          name: http
+        resources:
+          requests:
+            cpu: "300m"         # 300m x 7 replicas = 2.1 cores (puede exceder quota de 2 cores)
+            memory: "128Mi"     # 128Mi x 7 replicas = 896Mi (dentro del límite de 2Gi)
+          limits:
+            cpu: "400m"         # 400m x 7 replicas = 2.8 cores (dentro del límite de 4 cores)
+            memory: "256Mi"     # 256Mi x 7 replicas = 1.75Gi (dentro del límite de 4Gi)
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5

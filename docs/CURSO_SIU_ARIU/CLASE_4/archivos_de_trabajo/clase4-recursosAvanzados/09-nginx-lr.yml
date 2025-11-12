@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: prueba
+  labels:
+    app: nginx-limitrange-test
+    component: webserver
+    tier: frontend
+  annotations:
+    description: "Deployment que demuestra el funcionamiento de LimitRange"
+    limitrange-demo: "Este Pod debe fallar si el LimitRange está aplicado (cpu: 2 > max: 1)"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-limitrange-test
+  template:
+    metadata:
+      labels:
+        app: nginx-limitrange-test
+        component: webserver
+        tier: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+          protocol: TCP
+          name: http
+        # resources:
+          # Requests que serán aplicados por el LimitRange (defaultRequest)
+          # requests:
+          #   cpu: 500m         # Será aplicado por LimitRange si no se especifica
+          #   memory: 128Mi     # Será aplicado por LimitRange si no se especifica
+          # Límites que exceden los máximos definidos en LimitRange
+          # Esto causará que el Pod sea rechazado por el Admission Controller
+          # limits:
+          #   cpu: "2"          # EXCEDE el máximo permitido (1 core) en LimitRange
+          #   memory: "2Gi"     # EXCEDE el máximo permitido (1Gi) en LimitRange
+          # Si se habilita este bloque en lugar del anterior, el Pod debería crearse exitosamente
+          # limits:
+          #   cpu: "800m"       # Dentro del límite (< 1 core)
+          #   memory: "512Mi"   # Dentro del límite (< 1Gi)

@@ -1,0 +1,50 @@
+# PostgreSQL StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql-db
+  namespace: prueba
+  labels:
+    app: postgresql-db
+spec:
+  serviceName: postgresql-db-service
+  selector:
+    matchLabels:
+      app: postgresql-db
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: postgresql-db
+    spec:
+      containers:
+        - name: postgresql-db
+          image: postgres:15-alpine
+          env:
+            - name: POSTGRES_DB
+              value: testdb
+            - name: POSTGRES_USER
+              value: testuser
+            - name: POSTGRES_PASSWORD
+              value: testpassword
+            - name: PGDATA
+              value: /data/pgdata
+
+---
+
+# PostgreSQL StatefulSet Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-db-lb
+  namespace: prueba
+  labels:
+    app: postgresql-db
+spec:
+  selector:
+    app: postgresql-db
+  type: LoadBalancer
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres

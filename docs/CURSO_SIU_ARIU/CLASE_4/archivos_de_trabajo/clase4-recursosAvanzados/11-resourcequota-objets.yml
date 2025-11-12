@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: object-counts-quota
+  namespace: prueba
+  labels:
+    app: object-counts-quota
+    component: resource-management
+    tier: policy
+  annotations:
+    description: "ResourceQuota que limita la cantidad de objetos Kubernetes por tipo en el namespace"
+spec:
+  hard:
+    # Límites de objetos básicos (core resources - siempre válidos)
+    pods: "10"                        # Máximo 10 Pods en el namespace
+    services: "5"                     # Máximo 5 Services en el namespace
+    secrets: "15"                     # Máximo 15 Secrets en el namespace
+    configmaps: "15"                  # Máximo 15 ConfigMaps en el namespace
+    
+    # Límites de controladores básicos
+    replicationcontrollers: "5"       # Máximo 5 ReplicationControllers
+    
+    # Límites de almacenamiento
+    persistentvolumeclaims: "5"       # Máximo 5 PVCs en el namespace
+    
+    # Límites de servicios especiales
+    services.loadbalancers: "2"       # Máximo 2 LoadBalancer Services
+    services.nodeports: "5"           # Máximo 5 NodePort Services
+    
+    # Límites con prefijo count/ (para recursos con API groups)
+    count/deployments.apps: "5"       # Máximo 5 Deployments
+    count/replicasets.apps: "10"      # Máximo 10 ReplicaSets
+    count/statefulsets.apps: "3"      # Máximo 3 StatefulSets
+    count/daemonsets.apps: "2"        # Máximo 2 DaemonSets
+    count/jobs.batch: "5"             # Máximo 5 Jobs
+    count/cronjobs.batch: "3"         # Máximo 3 CronJobs

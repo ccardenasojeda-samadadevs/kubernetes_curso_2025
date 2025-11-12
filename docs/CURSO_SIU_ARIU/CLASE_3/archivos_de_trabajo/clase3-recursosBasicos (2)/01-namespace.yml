@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prueba
+  labels:
+    name: prueba
+    purpose: training
+    environment: demo
+  annotations:
+    description: "Namespace para práctica de Kubernetes - Clase 3"
+    created-by: "riu-capacitacion"

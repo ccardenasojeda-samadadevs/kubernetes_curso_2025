@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resources-quota
+  namespace: prueba
+  labels:
+    app: compute-resources-quota
+    component: resource-management
+    tier: policy
+  annotations:
+    description: "ResourceQuota que limita el consumo total de recursos computacionales en el namespace"
+spec:
+  hard:
+    # Límites para requests (recursos garantizados)
+    requests.cpu: "2"         # Máximo 2 cores de CPU solicitados en todo el namespace
+    requests.memory: 2Gi      # Máximo 2Gi de memoria solicitada en todo el namespace
+    # Límites para limits (recursos máximos)
+    limits.cpu: "4"           # Máximo 4 cores de CPU como límite en todo el namespace  
+    limits.memory: 4Gi        # Máximo 4Gi de memoria como límite en todo el namespace
+    # Límites de almacenamiento
+    requests.storage: "10Gi"  # Máximo 10Gi de almacenamiento solicitado

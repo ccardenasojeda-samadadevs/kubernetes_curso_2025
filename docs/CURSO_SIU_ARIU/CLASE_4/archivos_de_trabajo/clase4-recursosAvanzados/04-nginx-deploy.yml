@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: prueba
+  labels:
+    app: nginx
+    component: webserver
+    tier: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+        component: webserver
+        tier: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+          protocol: TCP
+          name: http
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+        # Montar configuración de nginx
+        volumeMounts:
+          - name: nginx-conf-file
+            mountPath: /etc/nginx/conf.d
+            readOnly: true
+          # Montar archivos HTML
+          - name: nginx-html-index
+            mountPath: /var/www/index.html
+            subPath: index
+            readOnly: false
+          - name: nginx-html-index
+            mountPath: /var/www/index2.html
+            subPath: index2
+            readOnly: false
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      # ConfigMap con configuración de nginx
+      - name: nginx-conf-file
+        configMap:
+          name: nginx-conf
+      # ConfigMap con archivos HTML
+      - name: nginx-html-index
+        configMap:
+          name: nginx-html
+      #         path: index2.html

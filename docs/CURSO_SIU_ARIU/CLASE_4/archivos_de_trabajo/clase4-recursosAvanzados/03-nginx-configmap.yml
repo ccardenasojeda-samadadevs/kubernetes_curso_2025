@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-html
+  namespace: prueba
+data:
+  index: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>My Nginx Server</title>
+    </head>
+    <body>
+        <h1>Welcome to My Nginx Server!</h1>
+        <p>This is a sample web page served by Nginx in Kubernetes.</p>
+    </body>
+    </html>
+  index2: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>My Nginx Server</title>
+    </head>
+    <body>
+        <h1>Welcome to My Nginx Server!</h1>
+        <p>Este es otro ejemplo.</p>
+    </body>
+    </html>

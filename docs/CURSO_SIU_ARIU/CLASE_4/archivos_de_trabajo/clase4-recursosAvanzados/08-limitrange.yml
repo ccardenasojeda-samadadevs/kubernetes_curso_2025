@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-resource-constraint
+  namespace: prueba
+  labels:
+    app: cpu-resource-constraint
+    component: resource-management
+    tier: policy
+  annotations:
+    description: "LimitRange que define límites y valores por defecto para recursos de CPU"
+spec:
+  limits:
+  - default: # Límites por defecto aplicados a contenedores sin especificación
+      cpu: 550m        # CPU limit por defecto: 0.55 cores
+    defaultRequest: # Requests por defecto aplicados a contenedores sin especificación
+      cpu: 500m        # CPU request por defecto: 0.5 cores
+    max: # Valor máximo permitido para límites de CPU
+      cpu: "1"          # Máximo 1 core por contenedor
+    min: # Valor mínimo requerido para requests de CPU
+      cpu: 100m         # Mínimo 0.1 cores por contenedor
+    type: Container     # Se aplica a contenedores individuales
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: memory-resource-constraint
+  namespace: prueba
+  labels:
+    app: memory-resource-constraint
+    component: resource-management
+    tier: policy
+  annotations:
+    description: "LimitRange que define límites y valores por defecto para recursos de memoria"
+spec:
+  limits:
+  - default: # Límites por defecto para memoria
+      memory: 256Mi     # Memory limit por defecto: 256 MB
+    defaultRequest: # Requests por defecto para memoria
+      memory: 128Mi     # Memory request por defecto: 128 MB
+    max: # Valor máximo permitido para límites de memoria
+      memory: 1Gi       # Máximo 1 GB por contenedor
+    min: # Valor mínimo requerido para requests de memoria
+      memory: 64Mi      # Mínimo 64 MB por contenedor
+    type: Container     # Se aplica a contenedores individuales

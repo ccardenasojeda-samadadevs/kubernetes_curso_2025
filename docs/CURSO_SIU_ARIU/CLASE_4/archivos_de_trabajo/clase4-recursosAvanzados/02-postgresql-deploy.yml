@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: prueba
+  labels:
+    app: postgres
+    component: database
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        component: database
+        tier: backend
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+          protocol: TCP
+        # Cargar variables de múltiples secrets
+        envFrom:
+          - secretRef:
+              name: postgres.env
+          - secretRef:
+              name: postgres2.env
+        # Variables individuales también pueden ser referenciadas
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres2.env
+                key: username
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        # Health checks específicos para PostgreSQL
+        livenessProbe:
+          exec:
+            command:
+              - pg_isready
+              - -U
+              - postgres
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+              - pg_isready
+              - -U
+              - postgres
+          initialDelaySeconds: 5
+          periodSeconds: 5

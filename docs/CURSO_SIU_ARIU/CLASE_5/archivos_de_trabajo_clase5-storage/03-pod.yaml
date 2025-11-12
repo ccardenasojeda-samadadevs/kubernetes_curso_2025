@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: prueba
+  labels:
+    app: nginx
+    component: webserver
+    tier: frontend
+    storage-demo: "true"
+  annotations:
+    description: "Pod de ejemplo con almacenamiento persistente NFS"
+    training-module: "clase5-storage"
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.25-alpine
+    ports:
+    - containerPort: 80
+      protocol: TCP
+      name: http
+    # Configuración de recursos
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+    # Montaje del volumen persistente
+    volumeMounts:
+    - name: web-content
+      mountPath: "/usr/share/nginx/html"
+      subPath: nginx  # Crear subdirectorio 'nginx' en el volumen
+  volumes:
+  - name: web-content
+    persistentVolumeClaim:
+      claimName: nginx-volum
+  # Configuración del pod
+  restartPolicy: Always

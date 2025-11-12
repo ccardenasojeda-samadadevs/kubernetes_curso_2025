@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: prueba
+  labels:
+    app: nginx
+    component: webserver
+    tier: frontend
+  annotations:
+    description: "Deployment de ejemplo mostrando configuración de requests y limits"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+        component: webserver
+        tier: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+          protocol: TCP
+          name: http
+        resources:
+          # Recursos solicitados (requests) - garantizados por el scheduler
+          requests:
+            memory: "64Mi"    # 64 Megabytes de memoria mínima
+            cpu: "250m"       # 0.25 cores de CPU mínimo (250 millicores)
+          # Límites máximos (limits) - enforcement del kubelet
+          limits:
+            memory: "128Mi"   # 128 Megabytes de memoria máxima
+            cpu: "500m"       # 0.5 cores de CPU máximo (500 millicores)
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5

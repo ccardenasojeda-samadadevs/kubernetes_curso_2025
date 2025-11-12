@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nginx-volum
+  labels:
+    app: nginx
+    storage-type: nfs
+    tier: storage
+  annotations:
+    description: "PersistentVolume NFS para almacenamiento estático"
+    training-module: "clase5-storage"
+    storage.kubernetes.io/provisioner: "manual"
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteMany  # NFS soporta múltiples lectores/escritores
+  persistentVolumeReclaimPolicy: Recycle  # Recycle, Retain, or Delete
+  storageClassName: nfsapp
+  # Opciones de montaje NFS optimizadas
+  mountOptions:
+    - hard           # Reintentar en caso de fallo del servidor
+    - nfsvers=4.2    # Usar NFSv4.2 para mejor rendimiento
+    - intr           # Permitir interrupciones
+    - timeo=60       # Timeout de 60 segundos
+    - retrans=2      # Número de retransmisiones
+  nfs:
+    # server: 172.27.100.203  # IP del servidor NFS (ajustar según tu entorno)
+    server: 190.124.232.114
+    path: /app/k8s          # Ruta compartida en el servidor NFS

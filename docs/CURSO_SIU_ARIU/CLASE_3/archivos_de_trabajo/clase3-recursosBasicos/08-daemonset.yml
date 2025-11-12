@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: prueba
+  labels:
+    app: node-exporter
+    tier: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+    spec:
+      nodeSelector:
+        monitoreo: habilitado   # Solo en nodos con este label
+      hostNetwork: true        # Para acceder a métricas del host
+      hostPID: true           # Para métricas de procesos del host
+      containers:
+        - name: node-exporter
+          image: prom/node-exporter:v1.8.2
+          args:
+            - '--path.rootfs=/host'
+            - '--web.listen-address=:9100'
+          ports:
+            - containerPort: 9100

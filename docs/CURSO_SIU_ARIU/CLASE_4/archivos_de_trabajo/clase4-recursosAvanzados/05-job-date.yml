@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: date-job
+  namespace: prueba
+  labels:
+    app: date-job
+    component: maintenance
+    tier: batch
+  annotations:
+    description: "Job de ejemplo que ejecuta tareas de mantenimiento con fecha/hora"
+spec:
+  # Job se considerará completo tras 1 ejecución exitosa
+  completions: 1
+  # No ejecutar Jobs en paralelo
+  parallelism: 1
+  # Eliminar el Job automáticamente después de 120 segundos de completarse
+  ttlSecondsAfterFinished: 120
+  # Reintentar hasta 3 veces en caso de fallo
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: date-job
+        component: maintenance
+        tier: batch
+    spec:
+      containers:
+      - name: echo-date-container
+        image: busybox:1.36
+        command: ["/bin/sh", "-c"]
+        args:
+         - |
+           echo "=== INICIO TAREAS DE MANTENIMIENTO ==="
+           date
+           echo "Ejecutando tareas de mantenimiento..."
+           sleep 5
+           echo "Finalizando tareas de mantenimiento."
+           date
+           echo "=== FIN TAREAS DE MANTENIMIENTO ==="
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 50m
+            memory: 32Mi
+      restartPolicy: Never

@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  namespace: prueba
+  labels:
+    app: nginx
+    component: ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # Configuración de timeouts
+    # Fuente: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/controller.allowSnippetAnnotations: "false"
+spec:
+  ingressClassName: nginx
+  
+  tls:
+  - hosts:
+    - prueba.k8s.riu.edu.ar
+    secretName: prueba.k8s.riu.edu.ar
+  rules:
+  - host: prueba.k8s.riu.edu.ar
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-html-ci
+            port:
+              number: 80

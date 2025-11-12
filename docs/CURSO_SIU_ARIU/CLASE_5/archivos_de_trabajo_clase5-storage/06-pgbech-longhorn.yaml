@@ -1,0 +1,225 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  namespace: prueba
+  labels:
+    app: postgres
+  annotations:
+    description: "Credenciales de PostgreSQL para benchmark"
+    training-module: "clase5-storage"
+type: Opaque
+stringData:
+  POSTGRES_DB: prueba
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: "PostgresAdmin123!"
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data-lh
+  namespace: prueba
+  labels:
+    app: postgres
+    storage-type: longhorn
+    tier: storage
+  annotations:
+    description: "PVC para datos de PostgreSQL con Longhorn"
+    training-module: "clase5-storage"
+    longhorn.io/replica-count: "3"  # 3 réplicas para alta disponibilidad
+spec:
+  storageClassName: longhorn
+  accessModes:
+  - ReadWriteOnce  # PostgreSQL necesita RWO
+  resources:
+    requests:
+      storage: 5Gi  # Más espacio para benchmarks
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: prueba
+  labels:
+    app: postgres
+    storage-type: longhorn
+  annotations:
+    description: "PostgreSQL StatefulSet con Longhorn para benchmarks"
+    training-module: "clase5-storage"
+spec:
+  serviceName: postgres-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        storage-type: longhorn
+        tier: database
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        # Configuración de recursos para benchmarks
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        # Variables de entorno desde Secret
+        envFrom:
+        - secretRef:
+            name: postgres-secret
+        env:
+        - name: TZ
+          value: "America/Argentina/Buenos_Aires"
+        - name: PGTZ
+          value: "America/Argentina/Buenos_Aires"
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        # Health checks
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - exec pg_isready -U postgres -h 127.0.0.1 -p 5432
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - exec pg_isready -U postgres -h 127.0.0.1 -p 5432
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 6
+        # Montaje del volumen de datos
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+          subPath: postgres
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-data-lh
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-headless
+  namespace: prueba
+  labels:
+    app: postgres
+  annotations:
+    description: "Headless service para PostgreSQL StatefulSet"
+    training-module: "clase5-storage"
+spec:
+  clusterIP: None
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: postgres
+    name: postgres
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: prueba
+  labels:
+    app: postgres
+  annotations:
+    description: "Service para acceso a PostgreSQL"
+    training-module: "clase5-storage"
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: postgres
+    name: postgres
+  type: ClusterIP
+
+# ---
+
+# # Job para ejecutar pgbench automáticamente
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   name: pgbench-longhorn
+#   namespace: prueba
+#   labels:
+#     app: pgbench
+#     storage-type: longhorn
+#   annotations:
+#     description: "Job para ejecutar benchmark de PostgreSQL con Longhorn"
+#     training-module: "clase5-storage"
+# spec:
+#   template:
+#     metadata:
+#       labels:
+#         app: pgbench
+#         storage-type: longhorn
+#     spec:
+#       restartPolicy: Never
+#       containers:
+#       - name: pgbench
+#         image: postgres:15-alpine
+#         command:
+#         - /bin/sh
+#         - -c
+#         - |
+#           echo "Esperando a que PostgreSQL esté listo..."
+#           until pg_isready -h postgres-service -p 5432 -U postgres; do
+#             echo "PostgreSQL no está listo - esperando..."
+#             sleep 2
+#           done
+          
+#           echo "PostgreSQL listo! Iniciando benchmark..."
+#           echo "=== BENCHMARK LONGHORN $(date) ==="
+          
+#           # Crear base de datos si no existe
+#           createdb -h postgres-service -U postgres prueba || echo "DB ya existe"
+          
+#           # Inicializar pgbench
+#           echo "Inicializando pgbench con scale factor 50..."
+#           pgbench -h postgres-service -U postgres -i -s 50 prueba
+          
+#           # Ejecutar benchmark
+#           echo "Ejecutando benchmark..."
+#           time pgbench -h postgres-service -U postgres -c 4 -j 4 -t 1000 prueba
+          
+#           echo "=== BENCHMARK COMPLETADO ==="
+#         env:
+#         - name: PGPASSWORD
+#           value: "PostgresAdmin123!"
+#         resources:
+#           requests:
+#             cpu: 100m
+#             memory: 128Mi
+#           limits:
+#             cpu: 500m
+#             memory: 256Mi
