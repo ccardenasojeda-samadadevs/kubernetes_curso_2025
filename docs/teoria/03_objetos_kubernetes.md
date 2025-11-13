@@ -38,7 +38,7 @@ Kubernetes Objects:
 ```
 ---
 
-#1. Introducción
+# 1. Introducción
 
 Kubernetes es un orquestador de contenedores basado en un modelo declarativo.
 El usuario define el estado deseado mediante archivos YAML, y Kubernetes ajusta continuamente
