@@ -1,9 +1,44 @@
 # 📘 Clase 3 – Objetos de Kubernetes
-Documentación integradora basada en la clase SIU ARIU + documentación oficial Kubernetes.
+## 📑 Índice
 
+1. [Introducción](#1.Introducción)
+2. [Desired State & Reconciliation](#2-desired-state--reconciliation)
+3. [Estructura general de un archivo YAML](#3-estructura-general-de-un-archivo-yaml)
+4. [Namespaces](#4-namespaces)
+5. [Pods](#5-pods)
+6. [ReplicaSet](#6-replicaset)
+7. [Deployment](#7-deployment)
+8. [DaemonSet](#8-daemonset)
+9. [StatefulSet](#9-statefulset)
+10. [ConfigMaps](#10-configmaps)
+11. [Secrets](#11-secrets)
+12. [Volúmenes y Persistencia](#12-volúmenes-y-persistencia)
+13. [Services](#13-services)
+14. [Ingress](#14-ingress)
+15. [MetalLB](#15-metallb)
+16. [Ejercicios aplicados en clase](#16-ejercicios-aplicados-en-clase)
+17. [Referencias](#17-referencias)
+> Documentación integradora basada en la clase SIU ARIU + documentación oficial Kubernetes.
+
+```txt
+Kubernetes Objects:
+  ├── Workloads
+  │     ├── Deployment
+  │     ├── StatefulSet
+  │     └── DaemonSet
+  ├── Networking
+  │     ├── Service
+  │     ├── Ingress
+  │     └── NetworkPolicy
+  └── Storage
+        ├── PV
+        ├── PVC
+        └── StorageClass
+
+```
 ---
 
-# 🧩 1. Introducción
+#1. Introducción
 
 Kubernetes es un orquestador de contenedores basado en un modelo declarativo.
 El usuario define el estado deseado mediante archivos YAML, y Kubernetes ajusta continuamente
@@ -29,6 +64,7 @@ Kubernetes opera mediante un ciclo continuo que compara:
 Si existe diferencia, los controladores aplican acciones correctivas.
 
 Diagrama conceptual del ciclo de reconciliación:
+```txt
 
   +---------------------------------------+
   |     USUARIO APLICA YAML (Desired)     |
@@ -58,7 +94,7 @@ Diagrama conceptual del ciclo de reconciliación:
   +---------------------------------------+
   |         ESTADO REAL (Actual)          |
   +---------------------------------------+
-
+```
 Este ciclo se ejecuta ininterrumpidamente mientras el cluster esté funcionando.
 
 ---
