@@ -1,7 +1,7 @@
 # 📘 Clase 3 – Objetos de Kubernetes
 ## 📑 Índice
 
-1. [Introducción](✅#1-introducción)
+1. [Introducción](#1-introducción)
 2. [Desired State & Reconciliation](#2-desired-state--reconciliation)
 3. [Estructura general de un archivo YAML](#3-estructura-general-de-un-archivo-yaml)
 4. [Namespaces](#4-namespaces)
@@ -20,6 +20,15 @@
 17. [Referencias](#17-referencias)
 > Documentación integradora basada en la clase SIU ARIU + documentación oficial Kubernetes.
 
+---
+
+# 1. Introducción
+
+Kubernetes es un orquestador de contenedores basado en un modelo declarativo.
+El usuario define el estado deseado mediante archivos YAML, y Kubernetes ajusta continuamente
+el estado actual hasta que ambos coinciden.
+
+### Los objetos de Kubernetes representan recursos que el sistema administra.
 ```txt
 Kubernetes Objects:
   ├── Workloads
@@ -36,34 +45,55 @@ Kubernetes Objects:
         └── StorageClass
 
 ```
----
+### ✔️ Componentes principales de un objeto:
 
-✅ # 1. Introducción
+| Componente     | Descripción                                                 |
+| -------------- | ----------------------------------------------------------- |
+| **apiVersion** | Define qué versión de la API se usa para crear el objeto.   |
+| **kind**       | Indica el tipo de recurso (Pod, Deployment, Service, etc.). |
+| **metadata**   | Contiene nombre, etiquetas y anotaciones del recurso.       |
+| **spec**       | Define el estado deseado (lo que el usuario quiere).        |
+| **status**     | Estado actual, generado por Kubernetes                      |
 
-Kubernetes es un orquestador de contenedores basado en un modelo declarativo.
-El usuario define el estado deseado mediante archivos YAML, y Kubernetes ajusta continuamente
-el estado actual hasta que ambos coinciden.
+El cluster calcula y actualiza automáticamente el status, que representa:
 
-Los objetos de Kubernetes representan recursos que el sistema administra. Cada objeto posee:
+- el estado actual del recurso,
 
-- apiVersion
-- kind
-- metadata
-- spec (estado deseado)
-- status (estado actual, generado por Kubernetes)
+- su disponibilidad,
 
+- eventos asociados,
+
+- información operacional real.
+
+> [!NOTE]
+> ¿Por qué es importante esta clase?📌
+>Esta unidad es clave porque:
+>- Introduce los objetos básicos y avanzados de Kubernetes.
+>- Explica cómo escribir y entender archivos YAML, que es el idioma nativo de K8s.
+>- Prepara el terreno para despliegues reales, control de versiones y prácticas de producción.
+>- Permite comprender cómo Kubernetes crea, replica, escala y repara aplicaciones automáticamente.
+  
+> [!NOTE]
+> ### 🧠 Concepto central: Declarativo, no imperativo
+> En Kubernetes:
+> - 👉 No decís "crear 3 contenedores", sino "quiero 3 réplicas".
+> - 👉 No decís "abrir este puerto", sino "quiero que se exponga por el puerto X".
+> - 👉 No decís "mover este contenedor a otro nodo",sino "quiero que siempre exista este Deployment".
+
+Kubernetes analiza continuamente esta intención y la hace realidad.
+  
 ---
 
 # 2. Desired State & Reconciliation
 
 Kubernetes opera mediante un ciclo continuo que compara:
-
-- lo que el usuario quiere (Desired State)
-- lo que realmente sucede (Actual State)
+- Lo que el usuario quiere (Desired State)
+- Lo que realmente sucede (Actual State)
 
 Si existe diferencia, los controladores aplican acciones correctivas.
 
-Diagrama conceptual del ciclo de reconciliación:
+###  ✔️ Diagrama conceptual del ciclo de Convergencia del estado:
+
 ```txt
 
   +---------------------------------------+
@@ -102,7 +132,7 @@ Este ciclo se ejecuta ininterrumpidamente mientras el cluster esté funcionando.
 # 3. Estructura general de un archivo YAML
 
 Todos los objetos siguen una estructura común:
-
+```txt
 apiVersion: version
 kind: tipo-de-objeto
 metadata:
@@ -110,9 +140,8 @@ metadata:
   namespace: namespace
 spec:
   definicion-del-objeto
-
+```
 Los campos obligatorios en todos los recursos son:
-
 - apiVersion
 - kind
 - metadata.name
@@ -126,14 +155,12 @@ El contenido de "spec" depende del tipo de objeto.
 Los namespaces permiten organizar y separar recursos dentro del cluster.
 
 Usos principales:
-
 - separar ambientes (dev, test, prod)
 - evitar colisiones de nombres
 - delimitar permisos (RBAC)
 - aislar proyectos y equipos
 
 Namespaces incluidos por defecto:
-
 - default
 - kube-system
 - kube-public
@@ -158,11 +185,11 @@ Diagrama conceptual de namespaces:
   +-----------------------------------------+
 ```
 Ejemplos útiles:
-
+```txt
 kubectl get ns
 kubectl create ns prueba
 kubectl delete ns prueba
-
+```
 ---
 
 # 5. Pods
@@ -171,7 +198,7 @@ El Pod es la unidad mínima de ejecución en Kubernetes. Puede contener uno o va
 contenedores que comparten red, almacenamiento y namespaces de proceso.
 
 Ejemplo básico de pod:
-
+```txt
 apiVersion: v1
 kind: Pod
 metadata:
@@ -180,7 +207,7 @@ spec:
   containers:
   - name: cont
     image: nginx
-
+```
 Diagrama detallado del Pod:
 ```txt
   +------------------------------------------------+
