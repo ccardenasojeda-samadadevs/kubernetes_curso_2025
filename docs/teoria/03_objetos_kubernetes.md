@@ -1,7 +1,7 @@
 # 📘 Clase 3 – Objetos de Kubernetes
 ## 📑 Índice
 
-1. [Introducción](#1-introducción)
+1. [Introducción](✅#1-introducción)
 2. [Desired State & Reconciliation](#2-desired-state--reconciliation)
 3. [Estructura general de un archivo YAML](#3-estructura-general-de-un-archivo-yaml)
 4. [Namespaces](#4-namespaces)
@@ -38,7 +38,7 @@ Kubernetes Objects:
 ```
 ---
 
-# 1. Introducción
+✅ # 1. Introducción
 
 Kubernetes es un orquestador de contenedores basado en un modelo declarativo.
 El usuario define el estado deseado mediante archivos YAML, y Kubernetes ajusta continuamente
