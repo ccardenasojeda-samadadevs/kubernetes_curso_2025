@@ -2,7 +2,7 @@
 ## 📑 Índice
 
 1. [Introducción](#1-introducción)
-2. [Desired State & Reconciliation](#2-desired-state--reconciliation)
+2. [Desired State & Reconciliation](#2-desired-state--convergencia)
 3. [Estructura general de un archivo YAML](#3-estructura-general-de-un-archivo-yaml)
 4. [Namespaces](#4-namespaces)
 5. [Pods](#5-pods)
@@ -84,7 +84,7 @@ Kubernetes analiza continuamente esta intención y la hace realidad.
   
 ---
 
-# 2. Desired State & Reconciliation
+# 2. Desired State & Convergencia 
 
 Kubernetes opera mediante un ciclo continuo que compara:
 - Lo que el usuario quiere (Desired State)
@@ -132,11 +132,12 @@ Este ciclo se ejecuta ininterrumpidamente mientras el cluster esté funcionando.
 # 3. Estructura general de un archivo YAML
 
 Todos los objetos siguen una estructura común:
-```txt
+
+```yaml
 apiVersion: version
 kind: tipo-de-objeto
 metadata:
-  name: nombre
+  name: nombre  # ← Hasta este campo son obligatorios para crear el objeto básico.
   namespace: namespace
 spec:
   definicion-del-objeto
@@ -154,19 +155,21 @@ El contenido de "spec" depende del tipo de objeto.
 
 Los namespaces permiten organizar y separar recursos dentro del cluster.
 
-Usos principales:
-- separar ambientes (dev, test, prod)
-- evitar colisiones de nombres
-- delimitar permisos (RBAC)
-- aislar proyectos y equipos
+### Usos principales:
+- Separar ambientes (dev, test, prod)
+- Evitar colisiones de nombres
+- Delimitar permisos (RBAC)
+- Aislar proyectos y equipos
+- Una forma de agrupar Pods y servicios en una misma aplicación
+- Un mecanismo para limitar el acceso a los recursos del clúster
 
-Namespaces incluidos por defecto:
+### Namespaces incluidos por defecto:
 - default
 - kube-system
 - kube-public
 - kube-node-lease
 
-Diagrama conceptual de namespaces:
+### Diagrama conceptual de namespaces:
 ```txt
   +-----------------------------------------+
   |           Kubernetes Cluster            |
@@ -185,7 +188,7 @@ Diagrama conceptual de namespaces:
   +-----------------------------------------+
 ```
 Ejemplos útiles:
-```txt
+```bash
 kubectl get ns
 kubectl create ns prueba
 kubectl delete ns prueba
@@ -198,7 +201,7 @@ El Pod es la unidad mínima de ejecución en Kubernetes. Puede contener uno o va
 contenedores que comparten red, almacenamiento y namespaces de proceso.
 
 Ejemplo básico de pod:
-```txt
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -233,7 +236,7 @@ ReplicaSet garantiza que siempre exista un número específico de Pods idéntico
 Si un Pod muere, ReplicaSet crea otro automáticamente.
 
 Ejemplo básico de ReplicaSet:
-
+```yaml
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
@@ -251,7 +254,7 @@ spec:
       containers:
       - name: cont
         image: nginx
-
+```
 Diagrama conceptual:
 ```txt
   +---------------------------+
