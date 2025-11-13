@@ -87,47 +87,64 @@ Kubernetes analiza continuamente esta intención y la hace realidad.
 
 # 2. Desired State & Convergencia 
 
-Kubernetes opera mediante un ciclo continuo que compara:
-- Lo que el usuario quiere (Desired State)
-- Lo que realmente sucede (Actual State)
+Kubernetes utiliza un mecanismo continuo llamado **convergencia del estado** (reconciliation loop), mediante el cual compara:
 
-Si existe diferencia, los controladores aplican acciones correctivas.
+- el **estado deseado** declarado por el usuario (YAML), y  
+- el **estado actual** del cluster,
 
-###  ✔️ Diagrama conceptual del ciclo de Convergencia del estado:
+realizando acciones para alinearlos.
 
+Este proceso es automático y permanente mientras el cluster esté activo.
+
+### 🔍 ¿Qué significa esto?
+
+Cada vez que aplicás un YAML, Kubernetes:
+
+1. Valida el manifiesto.
+2. Lo almacena en `etcd` como **estado deseado**.
+3. Los *controladores* comparan ese estado con lo que realmente existe.
+4. Si hay diferencia, Kubernetes crea, elimina o reconfigura recursos.
+5. El ciclo se repite constantemente.
+
+Este mecanismo es el que le permite a Kubernetes:
+
+- reemplazar pods caídos,  
+- recrear una app si cambia su imagen,  
+- escalar automáticamente,  
+- garantizar la disponibilidad de servicios.
+
+---
+
+### 📘 Diagrama conceptual del ciclo de convergencia
 ```txt
-
-  +---------------------------------------+
-  |     USUARIO APLICA YAML (Desired)     |
-  +---------------------------------------+
-                      |
-                      v
-  +---------------------------------------+
-  |         API SERVER (Validación)       |
-  +---------------------------------------+
-                      |
-                      v
-  +---------------------------------------+
-  |        etcd (Almacena Desired)        |
-  +---------------------------------------+
-                      |
-                      v
-  +------------------------------------------------+
-  | CONTROLLERS (Comparan Desired vs Actual State) |
-  +------------------------------------------------+
-                      |
-                      v
-  +----------------------------------------------+
-  |   Si difiere -> Acciones correctivas         |
-  +----------------------------------------------+
-                      |
-                      v
-  +---------------------------------------+
-  |         ESTADO REAL (Actual)          |
-  +---------------------------------------+
+┌───────────────────────────────┐
+│ Usuario aplica YAML │
+│ (Desired State) │
+└───────────────┬───────────────┘
+│
+v
+┌───────────────────────────────┐
+│         API Server │
+│ (Valida y guarda en etcd) │
+└───────────────┬───────────────┘
+│
+v
+┌───────────────────────────────┐
+│ Controllers (Loop de Control) │
+│ Compara Desired vs Actual │
+└───────────────┬───────────────┘
+│
+v
+┌───────────────────────────────┐
+│    Acciones correctivas │
+│ (crear, eliminar, actualizar) │
+└───────────────┬───────────────┘
+│
+v
+┌───────────────────────────────┐
+│         Actual State │
+└───────────────────────────────┘
 ```
-Este ciclo se ejecuta ininterrumpidamente mientras el cluster esté funcionando.
-
 ---
 
 # 3. Estructura general de un archivo YAML
