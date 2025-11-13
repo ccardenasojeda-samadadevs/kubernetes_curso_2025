@@ -99,7 +99,7 @@ Este ciclo se ejecuta ininterrumpidamente mientras el cluster esté funcionando.
 
 ---
 
-# 📝 3. Estructura general de un archivo YAML
+# 3. Estructura general de un archivo YAML
 
 Todos los objetos siguen una estructura común:
 
@@ -121,7 +121,7 @@ El contenido de "spec" depende del tipo de objeto.
 
 ---
 
-# 🗂️ 4. Namespaces
+# 4. Namespaces
 
 Los namespaces permiten organizar y separar recursos dentro del cluster.
 
@@ -140,7 +140,7 @@ Namespaces incluidos por defecto:
 - kube-node-lease
 
 Diagrama conceptual de namespaces:
-
+```txt
   +-----------------------------------------+
   |           Kubernetes Cluster            |
   +-----------------------------------------+
@@ -156,7 +156,7 @@ Diagrama conceptual de namespaces:
   |  Namespace: prueba                      |
   |    - recursos aislados                  |
   +-----------------------------------------+
-
+```
 Ejemplos útiles:
 
 kubectl get ns
