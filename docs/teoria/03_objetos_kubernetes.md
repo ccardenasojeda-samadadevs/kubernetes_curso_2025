@@ -165,7 +165,7 @@ kubectl delete ns prueba
 
 ---
 
-# 🧱 5. Pods
+# 5. Pods
 
 El Pod es la unidad mínima de ejecución en Kubernetes. Puede contener uno o varios
 contenedores que comparten red, almacenamiento y namespaces de proceso.
@@ -182,7 +182,7 @@ spec:
     image: nginx
 
 Diagrama detallado del Pod:
-
+```txt
   +------------------------------------------------+
   |                     POD                        |
   |                                                |
@@ -197,7 +197,7 @@ Diagrama detallado del Pod:
   |   - volúmenes                                  |
   |   - namespaces                                 |
   +------------------------------------------------+
-
+```
 Los Pods son efímeros: Kubernetes puede destruirlos y recrearlos automáticamente.
 
 # 6. ReplicaSet
@@ -226,7 +226,7 @@ spec:
         image: nginx
 
 Diagrama conceptual:
-
+```txt
   +---------------------------+
   |        ReplicaSet         |
   +---------------------------+
@@ -235,6 +235,7 @@ Diagrama conceptual:
   +---------+ +---------+ +---------+
   | Pod #1  | | Pod #2  | | Pod #3  |
   +---------+ +---------+ +---------+
+```
 
 El ReplicaSet no se usa directamente la mayoría de las veces:  
 los Deployments generan y controlan ReplicaSets internamente.
@@ -273,6 +274,7 @@ spec:
         image: nginx:1.25
 
 Diagrama conceptual de Deployment → ReplicaSet → Pods:
+```txt
 
   +---------------------------+
   |        Deployment         |
@@ -299,7 +301,7 @@ Actualizaciones rolling update:
   +--------------------------+
   |   Deployment v2 (RS2)    |
   +--------------------------+
-
+```
 Comandos importantes:
 
 kubectl rollout status deployment nginx-deploy  
@@ -320,7 +322,7 @@ Casos típicos de uso:
 - almacenamiento (CSI daemons)
 
 Diagrama conceptual:
-
+```txt
   +---------------------------+
   |         DaemonSet         |
   +---------------------------+
@@ -330,7 +332,7 @@ Diagrama conceptual:
   | Node 1  | | Node 2  | | Node 3  |
   | Pod DS  | | Pod DS  | | Pod DS  |
   +---------+ +---------+ +---------+
-
+```
 DaemonSet = un Pod por nodo.
 
 ---
@@ -382,7 +384,7 @@ spec:
           storage: 5Gi
 
 Diagrama conceptual del StatefulSet:
-
+```txt
   +----------------------------+
   |        StatefulSet         |
   +----------------------------+
@@ -396,7 +398,7 @@ Diagrama conceptual del StatefulSet:
       | Pod miapp-1     |
       | PVC miapp-1     |
       +------------------+
-
+```
 Cada Pod tiene su propio volumen persistente.
 
 ---
@@ -473,7 +475,7 @@ Para datos persistentes, Kubernetes ofrece:
 - StorageClass: define cómo se generan (o no) los volúmenes.
 
 Diagrama conceptual:
-
+```txt
   +------------------------+
   |   PersistentVolume     |
   +------------------------+
@@ -487,7 +489,7 @@ Diagrama conceptual:
   +------------------------+
   |         Pod            |
   +------------------------+
-
+```
 Ejemplo de PVC:
 
 apiVersion: v1
@@ -539,14 +541,14 @@ spec:
   type: ClusterIP
 
 Diagrama conceptual de Service:
-
+```txt
   +-----------+      +---------+
   | Service   | ---> | Pod A   |
   +-----------+      +---------+
          \            +---------+
           \---------> | Pod B   |
                        +---------+
-
+```
 El Service crea automáticamente Endpoints.
 
 ---
@@ -557,7 +559,7 @@ Cuando un Service usa selector, Kubernetes genera:
 
 - **Endpoints**: lista de IPs de los pods asociados.
 - **EndpointSlice**: versión más nueva, escalable.
-
+```txt
 Ejemplo conceptual:
 
   Service “web”
@@ -568,7 +570,7 @@ Ejemplo conceptual:
   |  - 10.0.1.10:80       |
   |  - 10.0.1.11:80       |
   +-----------------------+
-
+```
 Podés verlos con:
 
 kubectl get endpoints  
@@ -601,7 +603,7 @@ spec:
             name: web
             port:
               number: 80
-
+```txt
 Diagrama conceptual:
 
                 +---------------------+
@@ -612,7 +614,7 @@ Internet --->   |   Ingress-NGINX     |
           +-------------+   +-------------+
           | Service A   |   | Service B   |
           +-------------+   +-------------+
-
+```
 ---
 
 # 16. MetalLB
