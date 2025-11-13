@@ -54,7 +54,7 @@ Los objetos de Kubernetes representan recursos que el sistema administra. Cada o
 
 ---
 
-# 2. Desired State y Reconciliation
+# 2. Desired State & Reconciliation
 
 Kubernetes opera mediante un ciclo continuo que compara:
 
