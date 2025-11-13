@@ -669,14 +669,14 @@ spec:
   - 192.168.10.251-192.168.10.254
 ```
 Diagrama:
-
+```txt
   +-------------------+
   |   MetalLB Speaker |
   +-------------------+
          |
          v
   Anuncia IPs del LB en la red física
-
+```
 Luego los Services tipo LoadBalancer reciben una IP del pool.
 
 ---
@@ -686,7 +686,7 @@ Luego los Services tipo LoadBalancer reciben una IP del pool.
 Relación directa con la práctica real del curso:
 
 1. **Despliegue de NGINX con Deployment**
-   ```bashkubectl apply -f deployment-nginx.yaml```
+   ```bash kubectl apply -f deployment-nginx.yaml```
 
 2. **Service NodePort**
    kubectl apply -f svc-nodeport.yaml  
