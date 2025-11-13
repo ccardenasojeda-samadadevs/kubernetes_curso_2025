@@ -17,8 +17,8 @@
 14. [Endpoints](#14-endpoints--endpointslice)
 15. [Ingress](#15-ingress)
 16. [MetalLB](#16-metallb)
-17. [Ejercicios aplicados en clase](#17-ejercicios-aplicados-en-clase)
-18. [Referencias](#18-referencias)
+17. [Ejercicios aplicados en clase](#17-ejercicios-realizados-en-clase)
+18. [Referencias](#18-referencias-oficiales)
 > Documentación integradora basada en la clase SIU ARIU + documentación oficial Kubernetes.
 
 ---
