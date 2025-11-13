@@ -14,10 +14,11 @@
 11. [Secrets](#11-secrets)
 12. [Volúmenes y Persistencia](#12-volúmenes-y-persistencia)
 13. [Services](#13-services)
-14. [Ingress](#14-ingress)
-15. [MetalLB](#15-metallb)
-16. [Ejercicios aplicados en clase](#16-ejercicios-aplicados-en-clase)
-17. [Referencias](#17-referencias)
+14. [Endpoints](#14-endpoints--endpointslice)
+15. [Ingress](#15-ingress)
+15. [MetalLB](#16-metallb)
+16. [Ejercicios aplicados en clase](#17-ejercicios-aplicados-en-clase)
+17. [Referencias](#18-referencias)
 > Documentación integradora basada en la clase SIU ARIU + documentación oficial Kubernetes.
 
 ---
@@ -583,7 +584,7 @@ El Service crea automáticamente Endpoints.
 
 ---
 
-# 14. Endpoints y EndpointSlice
+# 14. Endpoints & EndpointSlice
 
 Cuando un Service usa selector, Kubernetes genera:
 
