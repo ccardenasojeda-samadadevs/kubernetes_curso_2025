@@ -277,14 +277,14 @@ los Deployments generan y controlan ReplicaSets internamente.
 Deployment es el recurso más utilizado en Kubernetes.  
 Gestiona:
 
-- actualizaciones (rolling updates)
-- retrocesos (rollbacks)
-- escalado automático o manual
-- historial de revisiones
-- estrategias de despliegue
+- Actualizaciones (rolling updates)
+- Retrocesos (rollbacks)
+- Escalado automático o manual
+- Historial de revisiones
+- Estrategias de despliegue
 
 Ejemplo básico:
-
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -302,7 +302,7 @@ spec:
       containers:
       - name: nginx
         image: nginx:1.25
-
+```
 Diagrama conceptual de Deployment → ReplicaSet → Pods:
 ```txt
 
@@ -333,11 +333,11 @@ Actualizaciones rolling update:
   +--------------------------+
 ```
 Comandos importantes:
-
+```bash
 kubectl rollout status deployment nginx-deploy  
 kubectl rollout history deployment nginx-deploy  
 kubectl rollout undo deployment nginx-deploy  
-
+```
 ---
 
 # 8. DaemonSet
@@ -346,10 +346,10 @@ DaemonSet asegura que un Pod se ejecute en TODOS los nodos del cluster, o en un 
 
 Casos típicos de uso:
 
-- agentes de logs (Fluentd, Filebeat)
-- agentes de monitoreo (Node Exporter, Prometheus)
-- componentes de red (Calico, Cilium)
-- almacenamiento (CSI daemons)
+- Agentes de logs (Fluentd, Filebeat)
+- Agentes de monitoreo (Node Exporter, Prometheus)
+- Componentes de red (Calico, Cilium)
+- Almacenamiento (CSI daemons)
 
 Diagrama conceptual:
 ```txt
@@ -371,16 +371,16 @@ DaemonSet = un Pod por nodo.
 
 StatefulSet gestiona aplicaciones con estado (stateful) que requieren:
 
-- identidad persistente  
-- nombres estables  
-- almacenamiento persistente por réplica  
-- orden de creación y apagado  
+- Identidad persistente  
+- Nombres estables  
+- Almacenamiento persistente por réplica  
+- Orden de creación y apagado  
 
 Ejemplos:  
 bases de datos, clusters distribuidos, almacenamiento, mensajes.
 
 Ejemplo básico:
-
+```yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -412,7 +412,7 @@ spec:
       resources:
         requests:
           storage: 5Gi
-
+```
 Diagrama conceptual del StatefulSet:
 ```txt
   +----------------------------+
@@ -438,7 +438,7 @@ Cada Pod tiene su propio volumen persistente.
 ConfigMaps almacenan configuración no sensible.
 
 Ejemplo:
-
+```yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -462,20 +462,20 @@ volumes:
 - name: cfg
   configMap:
     name: cfg
-
+```
 ---
 
 # 11. Secrets
 
 Secrets almacenan información sensible:
 
-- contraseñas
-- tokens
-- certificados
-- claves SSH
+- Contraseñas
+- Tokens
+- Certificados
+- Claves SSH
 
 Ejemplo simple:
-
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -483,17 +483,17 @@ metadata:
 type: Opaque
 data:
   pass: cGFzc3dvcmQ=
-
+```
 Comandos útiles:
-
+```bash
 kubectl create secret generic nombre --from-literal=pass=123  
 kubectl describe secret nombre  
 kubectl get secret nombre -o yaml  
-
+```
 Secrets pueden montarse:
 
-- como variables de entorno
-- como archivos dentro de un volumen
+- Como variables de entorno
+- Como archivos dentro de un volumen
 
 # 12. Volúmenes y Persistencia
 
@@ -521,7 +521,7 @@ Diagrama conceptual:
   +------------------------+
 ```
 Ejemplo de PVC:
-
+```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -533,7 +533,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-
+```
 StatefulSets crean PVCs automáticamente usando volumeClaimTemplates.
 
 ---
@@ -557,7 +557,7 @@ Tipos:
    Alias DNS.
 
 Ejemplo de ClusterIP:
-
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -569,7 +569,7 @@ spec:
   - port: 80
     targetPort: 80
   type: ClusterIP
-
+```
 Diagrama conceptual de Service:
 ```txt
   +-----------+      +---------+
@@ -602,10 +602,10 @@ Ejemplo conceptual:
   +-----------------------+
 ```
 Podés verlos con:
-
+```bash
 kubectl get endpoints  
 kubectl get endpointslices  
-
+```
 ---
 
 # 15. Ingress
@@ -616,7 +616,7 @@ Permite usar múltiples sitios bajo un mismo LoadBalancer.
 Requiere un controlador: en este curso usamos **Ingress-NGINX**.
 
 Ejemplo básico:
-
+```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -633,6 +633,7 @@ spec:
             name: web
             port:
               number: 80
+```
 ```txt
 Diagrama conceptual:
 
@@ -656,7 +657,7 @@ Trabaja en modo:
 - BGP → avanzado  
 
 Ejemplo de pool:
-
+```yaml
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
@@ -665,7 +666,7 @@ metadata:
 spec:
   addresses:
   - 192.168.10.251-192.168.10.254
-
+```
 Diagrama:
 
   +-------------------+
@@ -684,7 +685,7 @@ Luego los Services tipo LoadBalancer reciben una IP del pool.
 Relación directa con la práctica real del curso:
 
 1. **Despliegue de NGINX con Deployment**
-   kubectl apply -f deployment-nginx.yaml
+   ```bashkubectl apply -f deployment-nginx.yaml```
 
 2. **Service NodePort**
    kubectl apply -f svc-nodeport.yaml  
