@@ -798,37 +798,45 @@ kubectl delete ipaddresspool pool1 -n metallb-system   # Eliminar IPPool
 Relación directa con la práctica real del curso:
 
 1. **Despliegue de NGINX con Deployment**
-   ```bash kubectl apply -f deployment-nginx.yaml```
+   ```bash
+   kubectl apply -f deployment-nginx.yaml
+   ```
 
-2. **Service NodePort**
-   kubectl apply -f svc-nodeport.yaml  
+3. **Service NodePort**
+   ```bash
+   kubectl apply -f svc-nodeport.yaml
+   ```
    Acceso por: http://IP_DEL_NODO:puerto
 
-3. **Configuración de MetalLB**
+5. **Configuración de MetalLB**
    - creación del IPAddressPool  
    - creación del L2Advertisement  
    - prueba con un Service LoadBalancer
 
-4. **Instalación de Ingress-NGINX**
+6. **Instalación de Ingress-NGINX**
+   ```bash
    helm repo add ingress-nginx  
-   helm install ...
-
-5. **Cert-Manager + Let's Encrypt**
+   helm install...
+   ```
+8. **Cert-Manager + Let's Encrypt**
+   ```bash
    helm repo add jetstack  
    kubectl apply -f ClusterIssuer/
+   ```
 
-6. **StatefulSet con almacenamiento local**
+10. **StatefulSet con almacenamiento local**
    - creación de StorageClass local-storage  
    - creación de PVC  
    - prueba con busybox + volumeClaimTemplates  
 
-7. Exploración de:
+11. Exploración de:
+```bash
    kubectl get pods  
    kubectl get svc  
    kubectl get endpoints  
    kubectl logs  
    kubectl describe  
-
+```
 ---
 
 # 18. Referencias oficiales
