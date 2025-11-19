@@ -205,11 +205,13 @@ Los namespaces permiten organizar y separar recursos dentro del cluster.
   |    - recursos aislados                  |
   +-----------------------------------------+
 ```
-Ejemplos útiles:
+Comandos útiles:
 ```bash
-kubectl get ns
-kubectl create ns prueba
-kubectl delete ns prueba
+kubectl get ns                      # Listar todos los namespaces
+kubectl create ns prueba            # Crear un namespace
+kubectl delete ns prueba            # Eliminar un namespace
+kubectl config set-context --current --namespace=prueba   # Cambiar el namespace por defecto
+
 ```
 ---
 
@@ -247,7 +249,17 @@ Diagrama detallado del Pod:
   +------------------------------------------------+
 ```
 Los Pods son efímeros: Kubernetes puede destruirlos y recrearlos automáticamente.
+Comandos útiles:
+```bash
+kubectl get pods -A                 # Ver todos los pods en todos los namespaces
+kubectl get pods -o wide            # Ver pods con IP y nodo
+kubectl describe pod mi-pod         # Detallar un pod específico
+kubectl logs mi-pod                 # Ver logs del contenedor principal
+kubectl exec -it mi-pod -- bash     # Entrar dentro del contenedor
+kubectl delete pod mi-pod           # Eliminar un pod (se recreará si depende de un controller)
 
+
+```
 # 6. ReplicaSet
 
 ReplicaSet garantiza que siempre exista un número específico de Pods idénticos ejecutándose.
@@ -287,7 +299,14 @@ Diagrama conceptual:
 
 El ReplicaSet no se usa directamente la mayoría de las veces:  
 los Deployments generan y controlan ReplicaSets internamente.
+Comandos útiles:
+```bash
+kubectl get rs                      # Listar ReplicaSets
+kubectl describe rs mi-rs           # Ver detalles del RS
+kubectl scale rs mi-rs --replicas=5 # Escalar manualmente
+kubectl delete rs mi-rs             # Eliminar un ReplicaSet (generalmente creado por Deployments)
 
+```
 ---
 
 # 7. Deployment
@@ -350,13 +369,22 @@ Actualizaciones rolling update:
   |   Deployment v2 (RS2)    |
   +--------------------------+
 ```
-Comandos importantes:
+Comandos útiles:
 ```bash
-kubectl rollout status deployment nginx-deploy # Muestra el estado del despliegue en tiempo real (si ya terminó, si sigue aplicando cambios, etc.)  
-kubectl rollout history deployment nginx-deploy # Lista el historial de revisiones del Deployment (útil para ver versiones previas y cambios aplicados) 
-kubectl rollout undo deployment nginx-deploy  # Revierte el Deployment a la versión anterior (rollback a la última revisión válida)
-kubectl rollout undo deployment nginx-deploy --to-revision=3 # Revierte específicamente a la revisión indicada (en este caso, la 3)
-kubectl rollout status daemonset/calico-node -n kube-system # (Ejemplo adicional) Verifica que el DaemonSet de Calico se haya actualizado correctamente
+# Muestra el estado del despliegue en tiempo real (si ya terminó, si sigue aplicando cambios, etc.)  
+kubectl rollout status deployment nginx-deploy
+
+# Lista el historial de revisiones del Deployment (útil para ver versiones previas y cambios aplicados)
+kubectl rollout history deployment nginx-deploy
+
+# Revierte el Deployment a la versión anterior (rollback a la última revisión válida)
+kubectl rollout undo deployment nginx-deploy
+
+# Revierte específicamente a la revisión indicada (en este caso, la 3)
+kubectl rollout undo deployment nginx-deploy --to-revision=3
+
+# (Ejemplo adicional) Verifica que el DaemonSet de Calico se haya actualizado correctamente
+kubectl rollout status daemonset/calico-node -n kube-system 
 ```
 ---
 
@@ -382,9 +410,19 @@ Diagrama conceptual:
   | Node 1  | | Node 2  | | Node 3  |
   | Pod DS  | | Pod DS  | | Pod DS  |
   +---------+ +---------+ +---------+
+
 ```
 DaemonSet = un Pod por nodo.
-
+Comandos útiles:
+```bash
+kubectl get ds -A                                   # Listar DaemonSets en todos los namespaces
+kubectl describe ds mi-daemonset                    # Ver detalles del DaemonSet
+kubectl get pods -o wide -l name=mi-daemonset       # Ver pods creados por el DS
+kubectl rollout status ds mi-daemonset              # Ver estado del rollout del DS
+kubectl rollout history ds mi-daemonset             # Ver historial del DaemonSet
+kubectl rollout undo ds mi-daemonset                # Revertir cambios en el DaemonSet
+kubectl delete ds mi-daemonset                      # Eliminar el DaemonSet
+```
 ---
 
 # 9. StatefulSet
@@ -450,7 +488,16 @@ Diagrama conceptual del StatefulSet:
       +------------------+
 ```
 Cada Pod tiene su propio volumen persistente.
+Comandos útiles:
+```bash
+kubectl get sts                                      # Listar StatefulSets
+kubectl describe sts mi-sts                          # Ver detalles del StatefulSet
+kubectl get pods -l app=mi-app -o wide               # Ver pods con nombre ordinal
+kubectl scale sts mi-sts --replicas=3                # Escalar (respetando orden)
+kubectl rollout status sts mi-sts                    # Ver estado del rollout
+kubectl delete sts mi-sts                            # Eliminar el StatefulSet (PVCs persisten)
 
+```
 ---
 
 # 10. ConfigMaps
@@ -483,6 +530,15 @@ volumes:
   configMap:
     name: cfg
 ```
+Comandos útiles:
+```bash
+kubectl get cm                                        # Listar ConfigMaps
+kubectl describe cm mi-config                         # Ver contenido y metadatos
+kubectl create cm mi-config --from-literal=clave=valor # Crear ConfigMap simple
+kubectl create cm mi-config --from-file=app.conf       # Crear desde archivo
+kubectl delete cm mi-config                            # Eliminar ConfigMap
+
+```
 ---
 
 # 11. Secrets
@@ -506,9 +562,12 @@ data:
 ```
 Comandos útiles:
 ```bash
-kubectl create secret generic nombre --from-literal=pass=123  
-kubectl describe secret nombre  
-kubectl get secret nombre -o yaml  
+kubectl get secret                                     # Listar Secrets
+kubectl describe secret mi-secret                      # Ver metadatos (valores están en base64)
+kubectl get secret mi-secret -o yaml                   # Ver contenido (base64)
+kubectl create secret generic mi-secret --from-literal=pass=1234  # Crear secreto
+kubectl delete secret mi-secret                        # Eliminar Secret
+  
 ```
 Secrets pueden montarse:
 
@@ -555,7 +614,15 @@ spec:
       storage: 5Gi
 ```
 StatefulSets crean PVCs automáticamente usando volumeClaimTemplates.
-
+Comandos útiles:
+```bash
+kubectl get pv                                         # Listar PersistentVolumes
+kubectl get pvc -A                                     # Listar PVCs en todos los namespaces
+kubectl describe pvc mi-pvc                            # Ver detalles del PVC
+kubectl delete pvc mi-pvc                              # Eliminar PVC (libera PV según política)
+kubectl describe pv mi-pv                              # Ver detalles del PV
+  
+```
 ---
 
 # 13. Services
@@ -600,7 +667,15 @@ Diagrama conceptual de Service:
                        +---------+
 ```
 El Service crea automáticamente Endpoints.
+Comandos útiles:
+```bash
+kubectl get svc -A                                     # Listar servicios
+kubectl describe svc mi-servicio                       # Ver detalles del servicio
+kubectl expose pod mi-pod --port=80 --type=NodePort    # Exponer un pod rápidamente
+kubectl delete svc mi-servicio                         # Eliminar un Service
 
+  
+```
 ---
 
 # 14. Endpoints & EndpointSlice
@@ -621,10 +696,12 @@ Ejemplo conceptual:
   |  - 10.0.1.11:80       |
   +-----------------------+
 ```
-Podés verlos con:
+Comandos útiles:
 ```bash
-kubectl get endpoints  
-kubectl get endpointslices  
+kubectl get endpoints                                  # Ver endpoints activos
+kubectl describe endpoints mi-servicio                 # Ver qué pods están asociados
+kubectl delete endpoints mi-servicio                   # Eliminar endpoints (se regeneran)
+
 ```
 ---
 
@@ -666,6 +743,13 @@ Internet --->   |   Ingress-NGINX     |
           | Service A   |   | Service B   |
           +-------------+   +-------------+
 ```
+Comandos útiles:
+```bash
+kubectl get ingress -A                                 # Listar todos los Ingress
+kubectl describe ingress mi-ingress                    # Ver reglas y controladores
+kubectl delete ingress mi-ingress                      # Eliminar un Ingress
+
+```
 ---
 
 # 16. MetalLB
@@ -698,6 +782,15 @@ Diagrama:
 ```
 Luego los Services tipo LoadBalancer reciben una IP del pool.
 
+Comandos útiles:
+```bash
+kubectl get pods -n metallb-system                     # Ver pods del controlador
+kubectl get svc -A | grep LoadBalancer                 # Ver servicios tipo LB
+kubectl describe ipaddresspool -n metallb-system pool1 # Ver IP pools
+kubectl describe l2advertisement -n metallb-system     # Ver anuncios L2
+kubectl delete ipaddresspool pool1 -n metallb-system   # Eliminar IPPool
+
+```
 ---
 
 # 17. Ejercicios realizados en clase
