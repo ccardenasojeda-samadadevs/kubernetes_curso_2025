@@ -2,7 +2,7 @@
 ## 📑 Índice
 
 1. [Introducción](#1-introducción)
-2. [Desired State & Reconciliation](#2-desired-state--convergencia)
+2. [Desired State & Convergencia](#2-desired-state--convergencia)
 3. [Estructura general de un archivo YAML](#3-estructura-general-de-un-archivo-yaml)
 4. [Namespaces](#4-namespaces)
 5. [Pods](#5-pods)
