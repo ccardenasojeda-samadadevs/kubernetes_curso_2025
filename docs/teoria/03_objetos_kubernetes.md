@@ -352,9 +352,11 @@ Actualizaciones rolling update:
 ```
 Comandos importantes:
 ```bash
-kubectl rollout status deployment nginx-deploy  
-kubectl rollout history deployment nginx-deploy  
-kubectl rollout undo deployment nginx-deploy  
+kubectl rollout status deployment nginx-deploy # Muestra el estado del despliegue en tiempo real (si ya terminó, si sigue aplicando cambios, etc.)  
+kubectl rollout history deployment nginx-deploy # Lista el historial de revisiones del Deployment (útil para ver versiones previas y cambios aplicados) 
+kubectl rollout undo deployment nginx-deploy  # Revierte el Deployment a la versión anterior (rollback a la última revisión válida)
+kubectl rollout undo deployment nginx-deploy --to-revision=3 # Revierte específicamente a la revisión indicada (en este caso, la 3)
+kubectl rollout status daemonset/calico-node -n kube-system # (Ejemplo adicional) Verifica que el DaemonSet de Calico se haya actualizado correctamente
 ```
 ---
 
