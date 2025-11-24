@@ -129,8 +129,8 @@ sudo exportfs -v  # Verificar exports activos
 #### 1️⃣ **Preparar namespace**
 ```bash
 # Limpiar namespace si existe
-kubectl delete namespace prueba --ignore-not-found=true
-kubectl create namespace prueba
+k delete namespace prueba --ignore-not-found=true
+k create namespace prueba
 
 # Configurar contexto
 k ns prueba
@@ -139,50 +139,50 @@ k ns prueba
 #### 2️⃣ **Crear PersistentVolume**
 ```bash
 # Aplicar configuración (ajustar IP del servidor NFS)
-kubectl apply -f 01-pv.yaml
+k apply -f 01-pv.yaml
 
 # Verificar estado
-kubectl get pv
-kubectl describe pv nginx-volum
+k get pv
+k describe pv nginx-volum
 ```
 
 #### 3️⃣ **Crear PersistentVolumeClaim**
 ```bash
 # Crear claim
-kubectl apply -f 02-pvc.yaml
+k apply -f 02-pvc.yaml
 
 # Verificar binding
-kubectl get pv,pvc
-kubectl describe pvc nginx-volum
+k get pv,pvc
+k describe pvc nginx-volum
 ```
 
 #### 4️⃣ **Desplegar Pod con volumen**
 ```bash
 # Crear pod
-kubectl apply -f 03-pod.yaml
+k apply -f 03-pod.yaml
 
 # Verificar montaje
-kubectl get pods
-kubectl describe pod nginx
+k get pods
+k describe pod nginx
 ```
 
 #### 5️⃣ **Probar persistencia**
 ```bash
 # Port forward para acceder
-kubectl port-forward pod/nginx 8080:80
+k port-forward pod/nginx 8080:80
 
 # Crear contenido
-kubectl exec -it nginx -- bash -c "echo 'Hello Persistent Storage!' > /usr/share/nginx/html/index.html"
+k exec -it nginx -- bash -c "echo 'Hello Persistent Storage!' > /usr/share/nginx/html/index.html"
 
 # Verificar
 curl http://localhost:8080
 
 # Eliminar pod y recrear
-kubectl delete pod nginx
-kubectl apply -f 03-pod.yaml
+k delete pod nginx
+k apply -f 03-pod.yaml
 
 # Verificar que el contenido persiste
-kubectl port-forward pod/nginx 8080:80
+k port-forward pod/nginx 8080:80
 curl http://localhost:8080
 ```
 
@@ -220,23 +220,23 @@ helm install nfs-subdir-external-provisioner \
   --namespace nfs-provisioner-system
 
 # Verificar instalación
-kubectl get pods -n nfs-provisioner-system
-kubectl get storageclass
+k get pods -n nfs-provisioner-system
+k get storageclass
 ```
 
 #### 2️⃣ **Probar aprovisionamiento dinámico**
 ```bash
 # Limpiar recursos anteriores
-kubectl delete namespace prueba
-kubectl create namespace prueba
-kubectl delete pv nginx-volum
+k delete namespace prueba
+k create namespace prueba
+k delete pv nginx-volum
 
 # Crear PVC con StorageClass
-kubectl apply -f 04-pvc-storageclass.yaml
+k apply -f 04-pvc-storageclass.yaml
 
 # Verificar aprovisionamiento automático
-kubectl get pvc,pv
-kubectl describe pvc nginx-volum-sc
+k get pvc,pv
+k describe pvc nginx-volum-sc
 ```
 
 #### 3️⃣ **Verificar en servidor NFS**
@@ -249,7 +249,7 @@ ls -la /app/k8s/
 #### 4️⃣ **Probar eliminación**
 ```bash
 # Eliminar PVC
-kubectl delete pvc nginx-volum-sc
+k delete pvc nginx-volum-sc
 
 # Verificar en servidor NFS (directorio archivado)
 ls -la /app/k8s/
@@ -317,19 +317,19 @@ sudo apt install -y nfs-common
 #### 3️⃣ **Verificar nodos son schedulables (opcional)**
 ```bash
 # Si los masters tienen taint NoSchedule, removerlo
-kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule- || true
-kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule- || true
+k taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule- || true
+k taint nodes --all node-role.kubernetes.io/master:NoSchedule- || true
 
 # Verificar nodos
-kubectl get nodes -o wide
+k get nodes -o wide
 ```
 
 ### 🚀 **Instalación**
 
 #### 1️⃣ **Instalar Longhorn**
 ```bash
-# Método 1: Usando kubectl
-kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.7.3/deploy/longhorn.yaml
+# Método 1: Usando k
+k apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.7.3/deploy/longhorn.yaml
 
 # Método 2: Usando Helm (recomendado)
 helm repo add longhorn https://charts.longhorn.io
@@ -341,7 +341,7 @@ helm install longhorn longhorn/longhorn \
   --version 1.7.3
 
 # Verificar instalación
-kubectl get pods -n longhorn-system -w
+k get pods -n longhorn-system -w
 ```
 
 #### 2️⃣ **Configurar acceso al UI**
@@ -350,11 +350,11 @@ kubectl get pods -n longhorn-system -w
 USER=admin
 PASSWORD="LonghornAdmin123!"
 echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" > auth
-kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
+k -n longhorn-system create secret generic basic-auth --from-file=auth
 rm auth
 
 # Crear Ingress para acceso web
-kubectl apply -f - <<EOF
+k apply -f - <<EOF
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -390,10 +390,10 @@ EOF
 #### 3️⃣ **Acceso alternativo con LoadBalancer**
 ```bash
 # Cambiar servicio a LoadBalancer
-kubectl patch svc longhorn-frontend -n longhorn-system -p '{"spec":{"type":"LoadBalancer"}}'
+k patch svc longhorn-frontend -n longhorn-system -p '{"spec":{"type":"LoadBalancer"}}'
 
 # Obtener IP externa
-kubectl get svc longhorn-frontend -n longhorn-system
+k get svc longhorn-frontend -n longhorn-system
 ```
 
 ### 🧪 **Configuración y Pruebas** (Diapo 29)
@@ -401,21 +401,21 @@ kubectl get svc longhorn-frontend -n longhorn-system
 #### 1️⃣ **Verificar StorageClass**
 ```bash
 # Ver StorageClass creado
-kubectl get storageclass
-kubectl describe storageclass longhorn
+k get storageclass
+k describe storageclass longhorn
 
 # Hacer Longhorn el StorageClass por defecto (opcional)
-kubectl patch storageclass longhorn -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+k patch storageclass longhorn -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
 #### 2️⃣ **Probar con Pod de ejemplo**
 ```bash
 # Crear Pod con PVC Longhorn
-kubectl apply -f 05-pvc-pod-longhorn.yaml
+k apply -f 05-pvc-pod-longhorn.yaml
 
 # Verificar estado
-kubectl get pods,pvc,pv
-kubectl describe pvc nginx-volum-sc-lh
+k get pods,pvc,pv
+k describe pvc nginx-volum-sc-lh
 ```
 
 #### 3️⃣ **Verificar en nodos**
@@ -434,18 +434,18 @@ sudo ls -la /var/lib/longhorn/replicas/
 #### 1️⃣ **Benchmark con Longhorn**
 ```bash
 # Eliminar recursos anteriores
-kubectl delete pod nginx-lh --ignore-not-found=true
-kubectl delete pvc nginx-volum-sc-lh --ignore-not-found=true
+k delete pod nginx-lh --ignore-not-found=true
+k delete pvc nginx-volum-sc-lh --ignore-not-found=true
 
 # Desplegar PostgreSQL con Longhorn
-kubectl apply -f 06-pgbech-longhorn.yaml
+k apply -f 06-pgbech-longhorn.yaml
 
 # Esperar a que esté listo
-kubectl wait --for=condition=ready pod -l app=postgres --timeout=300s
+k wait --for=condition=ready pod -l app=postgres --timeout=300s
 
 # Ejecutar benchmark
-POD_NAME=$(kubectl get pods -l app=postgres -o jsonpath='{.items[0].metadata.name}')
-kubectl exec -it $POD_NAME -- bash -c "
+POD_NAME=$(k get pods -l app=postgres -o jsonpath='{.items[0].metadata.name}')
+k exec -it $POD_NAME -- bash -c "
   su - postgres -c '
     createdb prueba
     pgbench -i -s 50 prueba
@@ -455,7 +455,7 @@ kubectl exec -it $POD_NAME -- bash -c "
 "
 
 # Prueba I/O
-kubectl exec -it $POD_NAME -- bash -c "
+k exec -it $POD_NAME -- bash -c "
   echo 'Testing sequential write with Longhorn...'
   time dd if=/dev/zero of=/var/lib/postgresql/data/test-longhorn bs=64k count=16k conv=fdatasync
   ls -lh /var/lib/postgresql/data/test-longhorn
@@ -465,17 +465,17 @@ kubectl exec -it $POD_NAME -- bash -c "
 #### 2️⃣ **Benchmark con NFS**
 ```bash
 # Limpiar recursos Longhorn
-kubectl delete -f 06-pgbech-longhorn.yaml
+k delete -f 06-pgbech-longhorn.yaml
 
 # Desplegar PostgreSQL con NFS
-kubectl apply -f 07-pgbech-nfs.yaml
+k apply -f 07-pgbech-nfs.yaml
 
 # Esperar a que esté listo
-kubectl wait --for=condition=ready pod -l app=postgres-nfs --timeout=300s
+k wait --for=condition=ready pod -l app=postgres-nfs --timeout=300s
 
 # Ejecutar benchmark
-POD_NAME=$(kubectl get pods -l app=postgres-nfs -o jsonpath='{.items[0].metadata.name}')
-kubectl exec -it $POD_NAME -- bash -c "
+POD_NAME=$(k get pods -l app=postgres-nfs -o jsonpath='{.items[0].metadata.name}')
+k exec -it $POD_NAME -- bash -c "
   su - postgres -c '
     createdb prueba
     pgbench -i -s 50 prueba
@@ -485,7 +485,7 @@ kubectl exec -it $POD_NAME -- bash -c "
 "
 
 # Prueba de I/O  
-kubectl exec -it $POD_NAME -- bash -c "
+k exec -it $POD_NAME -- bash -c "
   echo 'Testing sequential write with NFS...'
   time dd if=/dev/zero of=/var/lib/postgresql/data/test-nfs bs=64k count=16k conv=fdatasync
   ls -lh /var/lib/postgresql/data/test-nfs
@@ -513,12 +513,12 @@ wp/
 ### 🚀 **Desplegar WordPress completo**
 ```bash
 # Aplicar todos los manifiestos
-kubectl apply -f wp/
+k apply -f wp/
 
 # Verificar despliegue
-kubectl get all -n prueba
-kubectl get pvc,pv -n prueba
+k get all -n prueba
+k get pvc,pv -n prueba
 
 # Obtener URL de acceso
-kubectl get ingress -n prueba
+k get ingress -n prueba
 ```
