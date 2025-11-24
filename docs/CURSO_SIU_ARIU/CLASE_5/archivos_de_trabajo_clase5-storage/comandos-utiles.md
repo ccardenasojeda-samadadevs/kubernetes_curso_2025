@@ -5,46 +5,46 @@
 ### 📋 **Gestión de Volúmenes**
 ```bash
 # Ver todos los recursos de almacenamiento
-kubectl get pv,pvc,sc
+k get pv,pvc,sc
 
 # Describir volúmenes
-kubectl describe pv <nombre>
-kubectl describe pvc <nombre> -n <namespace>
+k describe pv <nombre>
+k describe pvc <nombre> -n <namespace>
 
 # Ver uso de almacenamiento por nodo
-kubectl top nodes
-kubectl describe node <nombre>
+k top nodes
+k describe node <nombre>
 
 # Ver eventos relacionados con almacenamiento
-kubectl get events --field-selector reason=FailedMount -n <namespace>
+k get events --field-selector reason=FailedMount -n <namespace>
 ```
 
 ### 🔍 **Debugging de Almacenamiento**
 ```bash
 # Ver logs del provisioner NFS
-kubectl logs -n nfs-provisioner-system deployment/nfs-subdir-external-provisioner
+k logs -n nfs-provisioner-system deployment/nfs-subdir-external-provisioner
 
 # Ver logs de Longhorn
-kubectl logs -n longhorn-system daemonset/longhorn-manager
+k logs -n longhorn-system daemonset/longhorn-manager
 
 # Verificar montajes en pods
-kubectl exec -it <pod> -- df -h
-kubectl exec -it <pod> -- mount | grep <volume>
+k exec -it <pod> -- df -h
+k exec -it <pod> -- mount | grep <volume>
 
 # Ver detalles de StorageClass
-kubectl describe storageclass <nombre>
+k describe storageclass <nombre>
 ```
 
 ### 📊 **Monitoreo y Métricas**
 ```bash
 # Ver métricas de volúmenes (si metrics-server está instalado)
-kubectl top pods --containers -n <namespace>
+k top pods --containers -n <namespace>
 
 # Verificar capacidad de nodos
-kubectl describe nodes | grep -A 5 "Allocated resources"
+k describe nodes | grep -A 5 "Allocated resources"
 
 # Ver PVCs pendientes
-kubectl get pvc --all-namespaces | grep Pending
+k get pvc --all-namespaces | grep Pending
 ```
 
 ---
@@ -56,7 +56,7 @@ kubectl get pvc --all-namespaces | grep Pending
 #### 🔴 **PVC en estado Pending**
 ```bash
 # Verificar eventos
-kubectl describe pvc <nombre> -n <namespace>
+k describe pvc <nombre> -n <namespace>
 
 # Posibles causas:
 # 1. No hay PV disponible que coincida
@@ -64,15 +64,15 @@ kubectl describe pvc <nombre> -n <namespace>
 # 3. Provisioner no está funcionando
 
 # Solución:
-kubectl get storageclass
-kubectl get pv
-kubectl logs -n <provisioner-namespace> <provisioner-pod>
+k get storageclass
+k get pv
+k logs -n <provisioner-namespace> <provisioner-pod>
 ```
 
 #### 🔴 **Pod no puede montar volumen**
 ```bash
 # Ver eventos del pod
-kubectl describe pod <nombre> -n <namespace>
+k describe pod <nombre> -n <namespace>
 
 # Verificar en nodos
 # Para NFS:
@@ -80,15 +80,15 @@ sudo showmount -e <nfs-server>
 sudo mount -t nfs <nfs-server>:<path> /tmp/test
 
 # Para Longhorn:
-kubectl get pods -n longhorn-system
-kubectl logs -n longhorn-system <longhorn-manager-pod>
+k get pods -n longhorn-system
+k logs -n longhorn-system <longhorn-manager-pod>
 ```
 
 #### 🔴 **Rendimiento lento**
 ```bash
 # Verificar métricas de nodos
-kubectl top nodes
-kubectl describe node <nombre>
+k top nodes
+k describe node <nombre>
 
 # Para NFS: verificar red y configuración
 ping <nfs-server>
