@@ -1,0 +1,74 @@
+---
+# ============================================================
+# 1. ClusterIssuer basado en CA local (para entornos privados)
+# ============================================================
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: ca-local-issuer
+spec:
+  ca:
+    secretName: ca-local-secret   # Debe existir en cert-manager namespace
+---
+# ============================================================
+# 2. CERTIFICATE para el host local del laboratorio
+# ============================================================
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: pruebas-k8stest-tls
+  namespace: prueba
+spec:
+  dnsNames:
+    - prueba.k8stest.unpa.edu.ar
+  secretName: pruebas-k8stest-tls
+  issuerRef:
+    name: ca-local-issuer
+    kind: ClusterIssuer
+---
+# ============================================================
+# 3. INGRESS NGINX con TLS local
+# ============================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  namespace: prueba
+  labels:
+    app: nginx
+    component: ingress
+  annotations:
+    # Usar nuestro propio issuer local
+    cert-manager.io/cluster-issuer: "ca-local-issuer"
+
+    # Redirección forzada a HTTPS
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+    # Timeouts útiles
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+
+    # Seguridad en anotaciones
+    nginx.ingress.kubernetes.io/controller.allowSnippetAnnotations: "false"
+
+spec:
+  ingressClassName: nginx
+
+  tls:
+  - hosts:
+      - prueba.k8stest.unpa.edu.ar
+    secretName: pruebas-k8stest-tls
+
+  rules:
+  - host: prueba.k8stest.unpa.edu.ar
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-html-ci
+            port:
+              number: 80

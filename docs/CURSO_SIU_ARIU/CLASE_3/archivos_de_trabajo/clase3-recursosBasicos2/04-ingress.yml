@@ -21,10 +21,10 @@ spec:
   
   tls:
   - hosts:
-    - prueba.k8s.riu.edu.ar
-    secretName: prueba.k8s.riu.edu.ar
+    - k8stest.unpa.edu.ar
+    secretName: k8stest.unpa.edu.ar
   rules:
-  - host: prueba.k8s.riu.edu.ar
+  - host: k8stest.unpa.edu.ar
     http:
       paths:
       - path: /
