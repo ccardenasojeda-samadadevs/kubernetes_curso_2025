@@ -248,6 +248,7 @@ ls -la /app/k8s/
 
 #### 4️⃣ **Probar eliminación**
 ```bash
+#EN MI CASO PROBE ASI Y NO ME FUNCIONO ELIMINAR YA QUE TIENE ASOCIASO UN POD, pero al eliminar el pod que tiene asociado paso  archived como indica mas abajo
 # Eliminar PVC
 k delete pvc nginx-volum-sc
 
