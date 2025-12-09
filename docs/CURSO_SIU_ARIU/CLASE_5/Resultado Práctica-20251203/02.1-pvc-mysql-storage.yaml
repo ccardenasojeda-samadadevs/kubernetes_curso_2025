@@ -5,7 +5,7 @@ metadata:
   labels:
     app: wordpress
 spec:
-  storageClassName: longhorn-1
+  storageClassName: longhorn-2
   accessModes:
     - ReadWriteOnce
   resources:

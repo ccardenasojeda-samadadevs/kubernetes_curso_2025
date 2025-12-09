@@ -26,5 +26,5 @@ spec:
     - retrans=2      # Número de retransmisiones
   nfs:
     # server: 172.27.100.203  # IP del servidor NFS (ajustar según tu entorno)
-    server: 190.124.232.114
-    path: /app/k8s          # Ruta compartida en el servidor NFS
+    server: 192.168.10.245
+    path: /media/ccardenas/datos_kubernetes/nfs_k8s          # Ruta compartida en el servidor NFS

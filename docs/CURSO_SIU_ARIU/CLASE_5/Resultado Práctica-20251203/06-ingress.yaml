@@ -12,10 +12,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - wordpress.edk8.siu.edu.ar
-    secretName: wordpress.edk8.siu.edu.ar
+    - wordpress.edk8.unpa.edu.ar
+    secretName: wordpress.edk8.unpa.edu.ar
   rules:
-  - host: wordpress.edk8.siu.edu.ar
+  - host: wordpress.edk8.unpa.edu.ar
     http:
       paths:
       - path: /
